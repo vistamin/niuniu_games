@@ -76,6 +76,7 @@ function pai_sum_array($arr)
 }
 
 //针对5张牌,拿出其中的3张,然后计算牛几
+//temp为xxyy,xx为10表示有牛,yy为10表示为牛牛,为02表示牛2,xx为00表示没有牛
 function compute_niuji($left, $arr)
 {
     $result1 = pai_sum_array($left);
@@ -83,11 +84,11 @@ function compute_niuji($left, $arr)
     {
         $right = array_diff($arr,$left);
         $result2 = pai_sum_array($right);
-        $temp = $result1 * 10000 + $result2 * 100;
+        $temp = $result1 * 100 + $result2;
     }
     else
     {
-        $temp = 0 * 10000 + 0 * 1000;
+        $temp = 0;
     }
     return $temp;
 }
@@ -137,7 +138,7 @@ function max_pai_in_arr($arr)
     return $max_value;
 }
 
-//计算这组数据中最大得牛
+//计算这手牌(5张)最大的牛
 function max_niuji_in_arr($arr, $left_len)
 {
     $res = combination($arr, $left_len);//进行组合运算
@@ -149,40 +150,40 @@ function max_niuji_in_arr($arr, $left_len)
         if ($niuji > $max_niuji)
             $max_niuji = $niuji;
     }
-    $max_niuji = str_pad(strval($max_niuji + $max), 6, '0', STR_PAD_LEFT);
+    $max_niuji = str_pad(strval($max_niuji + $max), 4, '0', STR_PAD_LEFT);
     return $max_niuji;
     
 }
 
-//在5张牌中有一张大王的情况下,计算最大值
+//在5张牌中有一张大王的情况下,计算最大的牛
 function max_niuji_has_dawang($arr)
 {
+    //3张能组成牛,一定是牛牛
     $max_niuji = max_niuji_in_arr($arr, 3);
-    if (intval($max_niuji) > 100000)
+    if (intval($max_niuji) > 1000)
     {
-        $max_niuji = "101000";
+        $max_niuji = "1010";
         return $max_niuji;
     }
+    //2张能组成牛,一定是牛牛
     $max_niuji = max_niuji_in_arr($arr, 2);
-    if (intval($max_niuji) > 100000)
+    if (intval($max_niuji) > 1000)
     {
-        $max_niuji = "101000";
+        $max_niuji = "1010";
         return $max_niuji;
     }
-    //无法组成牛牛的情况下
-    $res = combination($arr, 2);//进行组合运算
+    //无法组成牛牛的情况下,只能组成牛
+    $res = combination($arr, 2);
     foreach($res as $value)
     {
-        print $value."\t";
         $left = explode(",", $value);
         $niuji = pai_sum_array($left);
         if ($niuji > $max_niuji)
             $max_niuji = $niuji;
     }
-    $max_niuji = "100".$max_niuji."00";
+    $max_niuji = "100".$max_niuji;
     return $max_niuji;
 }
-
 
 
 
@@ -204,18 +205,17 @@ $poker[57]="小王";
 $poker[58]="大王";
 
 
-
-
-
 //$PEOPLE = $argv[1];
-$PEOPLE = 4;
+$PEOPLE = 3;
 if ($PEOPLE >= 9)
 {
     print "人数太多\n";
     exit(1);
 }
 $total = array();
-$result = array();
+
+
+
 for($j=0;$j<$PEOPLE;$j++)
 {
     $arr = array();
@@ -246,16 +246,15 @@ for($j=0;$j<$PEOPLE;$j++)
         else if ($card == 58)
             $flag = $flag + 2;
         else
-            //先不插入大小王到数组里面
+            //先不插入大、小王到数组里面
             array_push($arr, $card);
-        $result[$j][$i] = $card;
     }
     if ($flag == 0)
     {
         $max_niuji = max_niuji_in_arr($arr, 3);
         $max_pai = max_pai_in_arr($arr);
     }
-    //拿到小王之后，小王可做黑桃6或者黑桃10.之所以用黑桃,是要取最大牌
+    //拿到小王之后，小王可做黑桃6或者黑桃10.大、小王并不参与最大牌的比较
     else if ($flag == 1)
     {
         $max_pai = max_pai_in_arr($arr);
@@ -310,8 +309,15 @@ for($j=0;$j<$PEOPLE;$j++)
     else
         print "没有牛, 最大牌为".$poker[$max_pai];
 
+    $niuji[$j] = $max_niuji;
+
     print "<br><br>";
 
+    
+
+
 }
+
+
 
 ?>
